@@ -1,48 +1,73 @@
 import 'package:flutter/material.dart';
 import '../constant/my_constant.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  bool isDarkMode = false;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true, 
-    appBar: AppBar(
-      backgroundColor: Colors.transparent, // เปลี่ยนเป็นโปร่งใส
-      elevation: 0,
-      leading: const Icon(Icons.arrow_back, color: Colors.white),
-      title: const Text("Profile", style: TextStyle(color: Colors.white)),
-      centerTitle: true,
-    ),
-      body: SingleChildScrollView( // ป้องกันหน้าจอล้น
-      child: Column(
-        children: [
-          Stack(
-            alignment: Alignment.center,
-            children: [
-              // --- ส่วนที่ 1: เส้นโค้งพื้นหลัง ---
-              ClipPath(
-                clipper: ProfileHeaderClipper(), // เรียกใช้จาก my_constant.dart
-                child: Container(
-                  height: 220,
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [lightBackgroundColor, const Color.fromARGB(255, 64, 154, 251)], // ปรับสีตามต้องการ
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
+      extendBodyBehindAppBar: true,
+      backgroundColor: isDarkMode ? const Color(0xFF1a1a2e) : Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text("Profile", style: TextStyle(color: Colors.white)),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(
+              isDarkMode ? Icons.light_mode : Icons.dark_mode,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              setState(() {
+                isDarkMode = !isDarkMode;
+              });
+            },
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                // --- ส่วนที่ 1: เส้นโค้งพื้นหลัง ---
+                ClipPath(
+                  clipper: ProfileHeaderClipper(),
+                  child: Container(
+                    height: 220,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: isDarkMode
+                            ? [const Color(0xFF16213e), const Color(0xFF0f3460)]
+                            : [lightBackgroundColor, const Color.fromARGB(255, 64, 154, 251)],
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                      ),
                     ),
                   ),
                 ),
-              ),
-                // ปุ่มแก้ไขพร้อมเงา 3 ชั้น
                 Positioned(
-                  bottom: 0, 
+                  bottom: 0,
                   child: Stack(
                     children: [
                       const CircleAvatar(
                         radius: 50.0,
-                        backgroundColor: Colors.white, // ขอบขาวรอบรูป
+                        backgroundColor: Colors.white,
                         child: CircleAvatar(
                           radius: 47.0,
                           backgroundImage: NetworkImage(
@@ -57,9 +82,9 @@ class ProfileScreen extends StatelessWidget {
                           width: 32,
                           height: 32,
                           decoration: BoxDecoration(
-                            color: Colors.blue,
+                            color: isDarkMode ? const Color(0xFF0f3460) : Colors.blue,
                             shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 2), // ขอบขาวปุ่ม Edit
+                            border: Border.all(color: Colors.white, width: 2),
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.black.withOpacity(0.2),
@@ -77,149 +102,147 @@ class ProfileScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 15),
-            Text("User Name", style: headingStyle),
-            SizedBox(height: 10),
+            GestureDetector(
+              onTap: () {
+                // ใส่ฟังก์ชันที่ต้องการเมื่อกด User Name
+                print("User Name clicked");
+              },
+              child: Text(
+                "User Name",
+                style: headingStyle.copyWith(
+                  color: isDarkMode ? Colors.white : Colors.black,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: darkBlue,
-                shape: StadiumBorder(),
+                backgroundColor: isDarkMode ? const Color(0xFF0f3460) : darkBlue,
+                shape: const StadiumBorder(),
               ),
               onPressed: () {},
-              child: Text("Edit Profile", style: bodyTextStyle.copyWith(color: Colors.white)),
+              child: Text(
+                "Edit Profile",
+                style: bodyTextStyle.copyWith(color: Colors.white),
+              ),
             ),
             const SizedBox(height: 50),
-            ListTile(
-              leading: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 177, 215, 255),
-                  borderRadius: BorderRadius.circular(5.0),
-                ),
-                child: const Icon(Icons.person_2_rounded, color: Colors.white, size: 20.0),
-              ),
-              title: Text(" My Profile ", style: optionTextStyle),
-              trailing: Container(
-                width: 30,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 232, 232, 232),
-                  borderRadius: BorderRadius.circular(100),
-                ),
-                child: const Icon(Icons.arrow_forward_ios, color: Color.fromARGB(255, 194, 194, 194), size: 15.0),
-              ),
+            _buildListTile(
+              icon: Icons.person_2_rounded,
+              title: " My Profile ",
+              isDarkMode: isDarkMode,
+              onTap: () {
+                print("My Profile clicked");
+                // Navigator.push(context, MaterialPageRoute(builder: (context) => MyProfilePage()));
+              },
             ),
             const SizedBox(height: 15),
-            ListTile(
-              leading: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 177, 215, 255),
-                  borderRadius: BorderRadius.circular(5.0),
-                ),
-                child: const Icon(Icons.mail_rounded, color: Colors.white, size: 20.0),
-              ),
-              title: Text(" Messages ", style: optionTextStyle),
-              trailing: Container(
-                width: 30,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 232, 232, 232),
-                  borderRadius: BorderRadius.circular(100),
-                ),
-                child: const Icon(Icons.arrow_forward_ios, color: Color.fromARGB(255, 194, 194, 194), size: 15.0),
-              ),
+            _buildListTile(
+              icon: Icons.mail_rounded,
+              title: " Messages ",
+              isDarkMode: isDarkMode,
+              onTap: () {
+                print("Messages clicked");
+              },
             ),
             const SizedBox(height: 15),
-            ListTile(
-              leading: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 177, 215, 255),
-                  borderRadius: BorderRadius.circular(5.0),
-                ),
-                child: 
-                const Icon(Icons.favorite_rounded, color: Colors.white, size: 20.0),
-              ),
-              title: Text(" Favourites ", style: optionTextStyle),
-              trailing: Container(
-                width: 30,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 232, 232, 232),
-                  borderRadius: BorderRadius.circular(100),
-                ),
-                child: const Icon(Icons.arrow_forward_ios, color: Color.fromARGB(255, 194, 194, 194), size: 15.0),
-              ),
+            _buildListTile(
+              icon: Icons.favorite_rounded,
+              title: " Favourites ",
+              isDarkMode: isDarkMode,
+              onTap: () {
+                print("Favourites clicked");
+              },
             ),
             const SizedBox(height: 15),
-            ListTile(
-              leading: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 177, 215, 255),
-                  borderRadius: BorderRadius.circular(5.0),
-                ),
-                child: const Icon(Icons.location_on_rounded, color: Colors.white, size: 20.0),
-              ),
-              title: Text(" Location ", style: optionTextStyle),
-              trailing: Container(
-                width: 30,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 232, 232, 232),
-                  borderRadius: BorderRadius.circular(100),
-                ),
-                child: const Icon(Icons.arrow_forward_ios, color: Color.fromARGB(255, 194, 194, 194), size: 15.0),
-              ),
+            _buildListTile(
+              icon: Icons.location_on_rounded,
+              title: " Location ",
+              isDarkMode: isDarkMode,
+              onTap: () {
+                print("Location clicked");
+              },
             ),
             const SizedBox(height: 15),
-            ListTile(
-              leading: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 177, 215, 255),
-                  borderRadius: BorderRadius.circular(5.0),
-                ),
-                child: const Icon(Icons.settings_rounded, color: Colors.white, size: 20.0),
-              ),
-              title: Text(" Settings ", style: optionTextStyle),
-              trailing: Container(
-                width: 30,
-                height: 30,
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 232, 232, 232),
-                  borderRadius: BorderRadius.circular(100),
-                ),
-                child: const Icon(Icons.arrow_forward_ios, color: Color.fromARGB(255, 194, 194, 194), size: 15.0),
-              ),
+            _buildListTile(
+              icon: Icons.settings_rounded,
+              title: " Settings ",
+              isDarkMode: isDarkMode,
+              onTap: () {
+                print("Settings clicked");
+              },
             ),
             const SizedBox(height: 30),
-            const Divider(),
-            ListTile(
-              leading: Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: const Color.fromARGB(255, 255, 177, 177),
-                  borderRadius: BorderRadius.circular(5.0),
+            Divider(color: isDarkMode ? Colors.grey[800] : Colors.grey[300]),
+            InkWell(
+              onTap: () {
+                print("Log out clicked");
+                // ใส่ฟังก์ชัน logout ที่นี่
+              },
+              child: ListTile(
+                leading: Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: const Color.fromARGB(255, 255, 177, 177),
+                    borderRadius: BorderRadius.circular(5.0),
+                  ),
+                  child: const Icon(Icons.logout_rounded, color: Colors.white, size: 20.0),
                 ),
-                child: const Icon(Icons.logout_rounded, color: Colors.white, size: 20.0),
-              ),
-              title: Text(" Log out ", style: logoutTextStyle),
-              trailing: Container(
-                width: 30,
-                height: 30,
-                decoration: BoxDecoration(
-
+                title: Text(
+                  " Log out ",
+                  style: logoutTextStyle,
                 ),
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildListTile({
+    required IconData icon,
+    required String title,
+    required bool isDarkMode,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      child: ListTile(
+        leading: Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: isDarkMode
+                ? const Color(0xFF0f3460)
+                : const Color.fromARGB(255, 177, 215, 255),
+            borderRadius: BorderRadius.circular(5.0),
+          ),
+          child: Icon(icon, color: Colors.white, size: 20.0),
+        ),
+        title: Text(
+          title,
+          style: optionTextStyle.copyWith(
+            color: isDarkMode ? Colors.white : Colors.black,
+          ),
+        ),
+        trailing: Container(
+          width: 30,
+          height: 30,
+          decoration: BoxDecoration(
+            color: isDarkMode
+                ? const Color(0xFF16213e)
+                : const Color.fromARGB(255, 232, 232, 232),
+            borderRadius: BorderRadius.circular(100),
+          ),
+          child: Icon(
+            Icons.arrow_forward_ios,
+            color: isDarkMode
+                ? Colors.grey[600]
+                : const Color.fromARGB(255, 194, 194, 194),
+            size: 15.0,
+          ),
         ),
       ),
     );
